@@ -1,4 +1,3 @@
-# 1日目
 Bundlerとは
 　RubyGemsを管理するツール
 
