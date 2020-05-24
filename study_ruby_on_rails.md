@@ -60,4 +60,91 @@ Controllerの中で `@num = 10 + 1` などを書く
 @をつけるとインスタンス変数となり、index以外でも参照できるようになる -> viewでも見れる
 index.html.erbで　`<%= @num %>` で表示できる
 
-## Modelの作成
+## データベースの確認と変更
+->
+```
+  User Load (1.3ms)  SELECT  "users".* FROM "users" LIMIT ?  [["LIMIT", 11]]
+ => #<ActiveRecord::Relation []> 
+ ```
+ SQL文がかえってくる
+
+ - 新しいUserモデルのインスタンスを作成し、値をセットして保存する
+```
+2.6.3 :002 > user = User.new
+ => #<User id: nil, name: nil, age: nil, created_at: nil, updated_at: nil> 
+2.6.3 :003 > user.name = 'Yuta Nakamura'
+ => "Yuta Nakamura" 
+2.6.3 :004 > user.age = 20
+ => 20 
+2.6.3 :005 > user.save
+```
+
+```
+(0.1ms)  begin transaction
+User Create (1.2ms)  INSERT INTO "users" ("name", "age", "created_at", "updated_at") VALUES (?, ?, ?, ?)  [["name", "Yuta Nakamura"], ["age", 20], ["created_at", "2020-05-24 03:57:39.752977"], ["updated_at", "2020-05-24 03:57:39.752977"]]
+(5.9ms)  commit transaction
+=> true 
+```
+trueが返ってくれば成功
+
+もう一度 `User.all` をすると
+```
+2.6.3 :010 > User.all
+User Load (0.1ms)  SELECT  "users".* FROM "users" LIMIT ?  [["LIMIT", 11]]
+=> #<ActiveRecord::Relation [#<User id: 1, name: "Yuta Nakamura", age: 20, created_at: "2020-05-24 03:57:39", updated_at: "2020-05-24 03:57:39">, #<User id: 2, name: "Taro Yamada", age: 24, created_at: "2020-05-24 04:01:03", updated_at: "2020-05-24 04:01:03">]> 
+ ```
+新しいインスタンスが入っている。
+
+- インスタンスの値を変更する
+```
+2.6.3 :012 > yamada = User.find(2)
+  User Load (0.1ms)  SELECT  "users".* FROM "users" WHERE "users"."id" = ? LIMIT ?  [["id", 2], ["LIMIT", 1]]
+ => #<User id: 2, name: "Taro Yamada", age: 24, created_at: "2020-05-24 04:01:03", updated_at: "2020-05-24 04:01:03"> 
+2.6.3 :013 > yamada.name = 'Hanako Yamada'
+ => "Hanako Yamada" 
+2.6.3 :014 > yamada.age = 30
+ => 30 
+2.6.3 :015 > yamada.save
+   (0.1ms)  begin transaction
+  User Update (0.9ms)  UPDATE "users" SET "name" = ?, "age" = ?, "updated_at" = ? WHERE "users"."id" = ?  [["name", "Hanako Yamada"], ["age", 30], ["updated_at", "2020-05-24 04:03:29.720393"], ["id", 2]]
+   (6.1ms)  commit transaction
+ => true 
+ ```
+
+ - レコードの削除
+ `変数.destroy`で削除できる
+ ```
+ 2.6.3 :018 > yamada = User.find(2)
+  User Load (0.2ms)  SELECT  "users".* FROM "users" WHERE "users"."id" = ? LIMIT ?  [["id", 2], ["LIMIT", 1]]
+ => #<User id: 2, name: "Hanako Yamada", age: 30, created_at: "2020-05-24 04:01:03", updated_at: "2020-05-24 04:03:29"> 
+2.6.3 :019 > yamada.destroy
+   (0.1ms)  begin transaction
+  User Destroy (1.1ms)  DELETE FROM "users" WHERE "users"."id" = ?  [["id", 2]]
+   (6.4ms)  commit transaction
+ => #<User id: 2, name: "Hanako Yamada", age: 30, created_at: "2020-05-24 04:01:03", updated_at: "2020-05-24 04:03:29"> 
+ ```
+
+`User.find(2).destroy`でも可
+
+- データベースの値をWebページに表示
+最初にレコードを作成する
+```
+2.6.3 :001 > nakamura = User.new(name: 'Nakamura', age: 20)                 
+ => #<User id: nil, name: "Nakamura", age: 20, created_at: nil, updated_at: nil> 
+2.6.3 :002 > nakamura.save
+```
+上のコードの省略形
+
+値を入れ終わったら、modelで@usersインスタンスを作成して、Userのレコードを入れる
+
+`@users = User.all`
+
+これでviewから参照できるようになる
+
+```
+<ul>
+  <% @users.each do |user| %>
+      <li><%= user.id %>, <%= user.name %>, <%= user.age %></li>
+  <% end %>
+</ul>
+```
