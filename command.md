@@ -20,6 +20,11 @@ controllerを作成する指示
 users...controllerの名前
 index...user controller内で定義するメソッドの名前（アクション）
 
+## コントローラーの作成2
+`$ rails g controller questions index show new edit`
+rails g controller...controllerを作成する指示
+index, show, new, edit...作成するメソッドの名前
+
 ## ルーティング
 `$ rails routes`
 URLとアクションの対応表が表示される。
